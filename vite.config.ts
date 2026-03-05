@@ -16,6 +16,7 @@ if (!existsSync("public/dist")) {
 
 export default defineConfig({
   build: {
+    emptyOutDir: false, // 保留 Docker 复制的 WASM 和 tsc 生成的 .d.ts
     lib: {
       entry: resolve(__dirname, "src/index.ts"),
       name: "FFprobeWasm",
