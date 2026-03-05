@@ -1,5 +1,7 @@
 # ffprobe-metadata-wasm
 
+[English](README.en.md) | **中文**
+
 > 基于 WebAssembly 的视频/音频元信息预检测库，Worker 模式，无需 SharedArrayBuffer
 
 基于 [alfg/ffprobe-wasm](https://github.com/alfg/ffprobe-wasm) 精简，仅保留元信息探测能力，移除 SharedArrayBuffer 依赖，提升浏览器兼容性。
