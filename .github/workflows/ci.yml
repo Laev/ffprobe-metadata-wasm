@@ -1,0 +1,132 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: write   # 创建 tag 和 release 需要
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "ci-${{ github.ref }}"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build WASM
+        run: |
+          docker build -t ffprobe-metadata-wasm .
+          mkdir -p dist
+          docker run --rm -v "$(pwd)/dist:/out" ffprobe-metadata-wasm cp /build/dist/ffprobe-wasm.js /build/dist/ffprobe-wasm.wasm /out/
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "yarn"
+
+      - name: Install
+        run: yarn install --frozen-lockfile
+
+      - name: Build
+        run: yarn build
+
+      - name: Upload dist
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  # 版本号更新时自动 Release + 发布 npm
+  auto-release:
+    name: Auto Release & Publish
+    needs: build
+    if: (github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'))
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download dist
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+
+      - name: Check version and release
+        id: release
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          TAG="v${VERSION}"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+
+          # 远程已存在该 tag 则跳过
+          if git ls-remote --exit-code --tags origin "$TAG" 2>/dev/null; then
+            echo "skip=true" >> $GITHUB_OUTPUT
+            echo "Tag $TAG already exists, skipping release."
+            exit 0
+          fi
+          echo "skip=false" >> $GITHUB_OUTPUT
+
+          # 创建 tag 并推送
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "$TAG" -m "Release $TAG"
+          git push origin "$TAG"
+
+          # 创建 GitHub Release
+          gh release create "$TAG" \
+            --title "$TAG" \
+            --notes "Release $TAG" \
+            --repo "$GITHUB_REPOSITORY"
+
+          # 发布到 npm
+          echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
+          npm publish --access public
+
+  deploy-pages:
+    name: Deploy Pages
+    needs: build
+    if: (github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')) || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download dist
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+
+      - name: Prepare Pages artifact
+        run: |
+          mkdir -p pages
+          cp -r example/* pages/
+          cp dist/index.js dist/index.d.ts dist/ffprobe-wasm.js dist/ffprobe-wasm.wasm pages/
+          sed -i "s|../dist/|./|g" pages/index.html
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: pages
+
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4
