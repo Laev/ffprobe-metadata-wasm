@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.3](https://github.com/Laev/ffprobe-metadata-wasm/compare/v0.1.2...v0.1.3) (2026-03-05)
+
+
+### Features
+
+* **ci:** update yml ([40c2089](https://github.com/Laev/ffprobe-metadata-wasm/commit/40c20893fa806d6ff3eeb5106709b9fe48318ec0))
+
 ### [0.1.2](https://github.com/Laev/ffprobe-metadata-wasm/compare/v0.1.1...v0.1.2) (2026-03-05)
 
 
