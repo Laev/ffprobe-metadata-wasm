@@ -111,7 +111,15 @@
   </div>
 
   <script type="module">
-    import { getInfo } from '../dist/index.js';
+    import { getInfo, init } from '../dist/index.js';
+
+    // 显式指定 WASM 路径。CI 部署时 ffprobe-wasm.js 与 index.html 同目录，sed 会把 DIST_BASE 替换为 ./
+    const DIST_BASE = '../dist/';
+    const base = new URL(DIST_BASE, document.baseURI).href;
+    await init({
+      wasmJsUrl: base + 'ffprobe-wasm.js',
+      wasmUrl: base + 'ffprobe-wasm.wasm',
+    });
 
     const fileInput = document.getElementById('fileInput');
     const resultDiv = document.getElementById('result');
