@@ -1,6 +1,6 @@
 {
   "name": "ffprobe-metadata-wasm",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "FFprobe WASM for browser - video/audio metadata probe only, Worker mode, no SharedArrayBuffer required",
   "type": "module",
   "main": "./dist/index.js",
