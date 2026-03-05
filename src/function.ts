@@ -12,6 +12,15 @@ export interface InitOptions {
 let initPromise: Promise<void> | null = null;
 let resolvedUrls: { jsUrl: string; wasmUrl: string } | null = null;
 
+/** Worker 内 importScripts 需要绝对 URL，将相对路径转为完整 URL */
+function ensureAbsoluteUrl(url: string): string {
+  if (url.startsWith("http://") || url.startsWith("https://")) return url;
+  if (typeof location !== "undefined") {
+    return new URL(url, location.origin).href;
+  }
+  return url;
+}
+
 function resolveUrls(options?: InitOptions): { jsUrl: string; wasmUrl: string } {
   if (options?.wasmJsUrl && options?.wasmUrl) {
     return {
@@ -73,9 +82,12 @@ function resolveUrls(options?: InitOptions): { jsUrl: string; wasmUrl: string } 
 }
 
 async function doInit(options?: InitOptions): Promise<void> {
-  const urls = resolveUrls(options);
-  resolvedUrls = urls;
-  await getWorker(urls);
+  const raw = resolveUrls(options);
+  resolvedUrls = {
+    jsUrl: ensureAbsoluteUrl(raw.jsUrl),
+    wasmUrl: ensureAbsoluteUrl(raw.wasmUrl),
+  };
+  await getWorker(resolvedUrls);
 }
 
 /**
