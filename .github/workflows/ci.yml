@@ -67,6 +67,7 @@ jobs:
       - name: Check version and release
         id: release
         env:
+          GH_TOKEN: ${{ github.token }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           VERSION=$(node -p "require('./package.json').version")
