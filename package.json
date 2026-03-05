@@ -1,0 +1,39 @@
+{
+  "name": "ffprobe-metadata-wasm",
+  "version": "0.1.0",
+  "description": "FFprobe WASM for browser - video/audio metadata probe only, Worker mode, no SharedArrayBuffer required",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc --emitDeclarationOnly && vite build",
+    "build:wasm": "docker build -t ffprobe-metadata-wasm . && docker run --rm -v \"$(pwd)/dist:/out\" ffprobe-metadata-wasm cp /build/dist/ffprobe-wasm.js /build/dist/ffprobe-wasm.wasm /out/",
+    "dev": "vite",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "ffprobe",
+    "wasm",
+    "webassembly",
+    "video",
+    "metadata",
+    "browser",
+    "emscripten"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0",
+    "vite": "^5.0.0"
+  }
+}
