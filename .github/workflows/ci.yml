@@ -58,7 +58,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: dist
-          path: dist/**
+          path: dist/
 
   # 版本号更新时自动 Release + 发布 npm
   auto-release:
@@ -75,7 +75,14 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: dist
-          path: .
+          path: dist
+
+      - name: Ensure dist structure
+        run: |
+          if [ -f dist/dist/index.js ]; then
+            mv dist/dist/* dist/ 2>/dev/null || true
+            rm -rf dist/dist
+          fi
 
       - name: Check version and release
         id: release
@@ -135,7 +142,14 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: dist
-          path: .
+          path: dist
+
+      - name: Ensure dist structure
+        run: |
+          if [ -f dist/dist/index.js ]; then
+            mv dist/dist/* dist/ 2>/dev/null || true
+            rm -rf dist/dist
+          fi
 
       - name: Prepare Pages artifact
         run: |
