@@ -58,7 +58,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: dist
-          path: dist/
+          path: dist/**
 
   # 版本号更新时自动 Release + 发布 npm
   auto-release:
