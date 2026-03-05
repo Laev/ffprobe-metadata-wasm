@@ -18,13 +18,14 @@ export default defineConfig({
   build: {
     emptyOutDir: false, // 保留 Docker 复制的 WASM 和 tsc 生成的 .d.ts
     lib: {
-      entry: resolve(__dirname, "src/index.ts"),
-      name: "FFprobeWasm",
-      fileName: "index",
+      entry: {
+        index: resolve(__dirname, "src/index.ts"),
+        "vite-plugin": resolve(__dirname, "src/vite-plugin.ts"),
+      },
       formats: ["es"],
     },
     rollupOptions: {
-      external: [],
+      external: ["fs", "path", "url", "node:fs", "node:path", "node:url"],
       output: {
         // 确保 WASM 文件被正确复制
         assetFileNames: (assetInfo) => {

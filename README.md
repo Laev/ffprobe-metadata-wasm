@@ -23,12 +23,42 @@ npm install ffprobe-metadata-wasm
 
 ## 使用
 
-### 基础用法
+### Vite 项目（推荐，零配置）
+
+添加插件后自动识别 Vite 环境，开发和生产均可直接使用：
 
 ```typescript
+// vite.config.ts
+import { ffprobeMetadataWasm } from 'ffprobe-metadata-wasm/vite';
+
+export default defineConfig({
+  plugins: [ffprobeMetadataWasm()],
+});
+```
+
+```typescript
+// 任意组件直接使用，无需 init
 import { getInfo } from 'ffprobe-metadata-wasm';
 
-// 首次调用自动加载 WASM，无需显式 init
+const result = await getInfo(videoFile);
+```
+
+### 非 Vite 或未打包场景
+
+包会通过 `import.meta.url` 解析 wasm 路径。**注意**：打包后该路径往往失效，导致 404。若出现初始化超时或 wasm 加载失败，需：
+
+1. **将 wasm 文件复制到可访问位置**（如 `public/` 或构建输出目录）
+2. **使用 `init({ wasmUrl, wasmJsUrl })` 显式传入 URL**
+
+```typescript
+import { init, getInfo } from 'ffprobe-metadata-wasm';
+
+// 确保 ffprobe-wasm.wasm / ffprobe-wasm.js 已部署到可访问路径后，显式 init
+await init({
+  wasmUrl: '/ffprobe-wasm.wasm',   // 或 CDN、相对路径等
+  wasmJsUrl: '/ffprobe-wasm.js',
+});
+
 const result = await getInfo(videoFile);
 
 if (result.result === 'ok') {
@@ -41,6 +71,8 @@ if (result.result === 'ok') {
   console.error('错误:', result.error);
 }
 ```
+
+wasm 文件位于 `node_modules/ffprobe-metadata-wasm/dist/` 或 `dist/dist/` 下。
 
 ### 显式初始化与自定义 WASM URL
 
@@ -58,6 +90,16 @@ await init(); // 无操作
 
 const result = await getInfo(file);
 ```
+
+### 故障排查
+
+| 现象 | 可能原因 | 解决方式 |
+|------|----------|----------|
+| 初始化超时 / WASM 404 | Vite 项目未添加插件 | 在 `vite.config.ts` 中添加 `ffprobeMetadataWasm()` 插件 |
+| 初始化超时 / WASM 404 | 非 Vite 或路径不对 | 使用 `init({ wasmUrl, wasmJsUrl })` 显式传入可访问的 URL |
+| 子路径部署 404 | base 配置与资源路径不匹配 | 插件会自动使用 `import.meta.env.BASE_URL`，确保 Vite `base` 配置正确 |
+
+超时错误会输出尝试加载的 URL，便于定位问题。
 
 ### 版本信息
 

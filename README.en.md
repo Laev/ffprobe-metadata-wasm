@@ -23,12 +23,42 @@ npm install ffprobe-metadata-wasm
 
 ## Usage
 
-### Basic
+### Vite projects (recommended, zero config)
+
+Add the plugin and use directly in dev and production:
 
 ```typescript
+// vite.config.ts
+import { ffprobeMetadataWasm } from 'ffprobe-metadata-wasm/vite';
+
+export default defineConfig({
+  plugins: [ffprobeMetadataWasm()],
+});
+```
+
+```typescript
+// Use anywhere without init
 import { getInfo } from 'ffprobe-metadata-wasm';
 
-// WASM loads automatically on first call, no explicit init
+const result = await getInfo(videoFile);
+```
+
+### Non-Vite or unbundled scenarios
+
+The package resolves wasm paths via `import.meta.url`. **Note**: After bundling, this often fails and causes 404. If you see init timeout or wasm load failure:
+
+1. **Copy wasm files** to an accessible location (e.g. `public/` or build output)
+2. **Call `init({ wasmUrl, wasmJsUrl })`** with explicit URLs
+
+```typescript
+import { init, getInfo } from 'ffprobe-metadata-wasm';
+
+// Ensure ffprobe-wasm.wasm / ffprobe-wasm.js are deployed, then init
+await init({
+  wasmUrl: '/ffprobe-wasm.wasm',   // or CDN, relative path, etc.
+  wasmJsUrl: '/ffprobe-wasm.js',
+});
+
 const result = await getInfo(videoFile);
 
 if (result.result === 'ok') {
@@ -41,6 +71,8 @@ if (result.result === 'ok') {
   console.error('Error:', result.error);
 }
 ```
+
+Wasm files are in `node_modules/ffprobe-metadata-wasm/dist/` or `dist/dist/`.
 
 ### Explicit init and custom WASM URL
 
@@ -58,6 +90,16 @@ await init(); // no-op
 
 const result = await getInfo(file);
 ```
+
+### Troubleshooting
+
+| Symptom | Possible cause | Solution |
+|---------|----------------|----------|
+| Init timeout / WASM 404 | Vite project without plugin | Add `ffprobeMetadataWasm()` to `vite.config.ts` |
+| Init timeout / WASM 404 | Non-Vite or wrong path | Use `init({ wasmUrl, wasmJsUrl })` with accessible URLs |
+| 404 on subpath deploy | base config mismatch | Plugin uses `import.meta.env.BASE_URL`; ensure Vite `base` is correct |
+
+Timeout errors include the attempted URLs for debugging.
 
 ### Version info
 
@@ -152,12 +194,15 @@ ffprobe-metadata-wasm/
 │   ├── function.ts       # Core logic (Worker mode)
 │   ├── worker-code.ts    # Worker inline code
 │   ├── worker-factory.ts # Worker creation and messaging
+│   ├── vite-plugin.ts    # Vite plugin (optional)
 │   ├── types.ts
 │   └── ffprobe-wasm-wrapper.cpp  # C++ wrapper
 ├── dist/                 # Build output
 │   ├── index.js
-│   ├── ffprobe-wasm.js
-│   └── ffprobe-wasm.wasm
+│   ├── vite-plugin.js
+│   └── dist/             # or root dist
+│       ├── ffprobe-wasm.js
+│       └── ffprobe-wasm.wasm
 ├── example/              # Preview page (not published)
 ├── Dockerfile
 ├── Makefile

@@ -59,7 +59,11 @@ export function getWorker(urls: WorkerUrls): Promise<Worker> {
       w.terminate();
       workerInstance = null;
       workerReady = null;
-      reject(new Error("FFprobe Worker 初始化超时（30秒）"));
+      reject(
+        new Error(
+          `FFprobe Worker 初始化超时（30秒）。请检查 WASM 资源是否可访问：\n  - wasm: ${urls.wasmUrl}\n  - js: ${urls.jsUrl}\n若为 404，Vite 项目请添加 ffprobeMetadataWasm() 插件并确保文件已复制到 public/。`
+        )
+      );
     }, 30000);
 
     const onMessage = (e: MessageEvent) => {

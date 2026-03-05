@@ -45,7 +45,20 @@ function resolveUrls(options?: InitOptions): { jsUrl: string; wasmUrl: string } 
       wasmUrl: jsStr.replace(/\.js$/, ".wasm"),
     };
   }
+  // 回退链：兼顾易用性与跨构建工具兼容
+  // 1. Vite：import.meta.env.BASE_URL 存在时，使用 base + 固定路径（配合 vite 插件复制到 public/）
+  // 2. 其他：使用 new URL 相对 import.meta.url（方案 A，计划 4.2）
+  const env = typeof import.meta !== "undefined" ? (import.meta as { env?: { BASE_URL?: string } }).env : undefined;
+  const baseUrl = env?.BASE_URL;
+  if (baseUrl != null && typeof baseUrl === "string") {
+    const baseNorm = baseUrl.endsWith("/") ? baseUrl : baseUrl + "/";
+    return {
+      jsUrl: baseNorm + "ffprobe-wasm.js",
+      wasmUrl: baseNorm + "ffprobe-wasm.wasm",
+    };
+  }
   try {
+    // 非 Vite 或 import.meta.url 可用时的回退，运行时解析
     const base = new URL("./ffprobe-wasm.js", import.meta.url).href;
     return {
       jsUrl: base,
@@ -164,7 +177,11 @@ export const getInfo = async (
   const fileName = input instanceof File ? input.name : "video";
 
   if (!resolvedUrls) {
-    return { result: "err", error: "Worker not initialized" };
+    return {
+      result: "err",
+      error:
+        "Worker 未初始化。若为 WASM 加载失败，请检查资源路径或使用 init({ wasmUrl, wasmJsUrl }) 显式传入。",
+    };
   }
   const w = await getWorker(resolvedUrls);
   const result = await sendGetFileInfo(w, fileName, buffer);
