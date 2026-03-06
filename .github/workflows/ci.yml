@@ -52,7 +52,7 @@ jobs:
         run: yarn install --frozen-lockfile
 
       - name: Build
-        run: yarn build:types
+        run: yarn build:lib
 
       - name: Upload dist
         uses: actions/upload-artifact@v4
