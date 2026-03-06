@@ -35,8 +35,12 @@
     "browser",
     "emscripten"
   ],
-  "author": "",
+  "author": "laev",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Laev/ffprobe-metadata-wasm.git"
+  },
   "devDependencies": {
     "@types/node": "^20.0.0",
     "typescript": "^5.0.0",
