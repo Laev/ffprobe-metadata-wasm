@@ -19,8 +19,10 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsc --emitDeclarationOnly && vite build",
-    "build:wasm": "docker build -t ffprobe-metadata-wasm . && docker run --rm -v \"$(pwd)/dist:/out\" ffprobe-metadata-wasm cp /build/dist/ffprobe-wasm.js /build/dist/ffprobe-wasm.wasm /out/",
+    "clean": "node -e \"const fs=require('node:fs'); fs.rmSync('dist',{recursive:true,force:true}); fs.rmSync('public/dist',{recursive:true,force:true});\"",
+    "build:lib": "tsc --emitDeclarationOnly && vite build",
+    "build:wasm": "docker build -t ffprobe-metadata-wasm . && docker run --rm -v \"$(pwd)/dist:/out\" ffprobe-metadata-wasm cp /build/dist/ffprobe-metadata-wasm.js /build/dist/ffprobe-metadata-wasm.wasm /out/",
+    "build": "npm run clean && npm run build:wasm && npm run build:lib",
     "dev": "vite",
     "prepublishOnly": "npm run build"
   },

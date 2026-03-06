@@ -40,7 +40,7 @@ jobs:
       - name: Copy WASM from container
         run: |
           mkdir -p dist
-          docker run --rm -v "$(pwd)/dist:/out" ffprobe-metadata-wasm:latest cp /build/dist/ffprobe-wasm.js /build/dist/ffprobe-wasm.wasm /out/
+          docker run --rm -v "$(pwd)/dist:/out" ffprobe-metadata-wasm:latest cp /build/dist/ffprobe-metadata-wasm.js /build/dist/ffprobe-metadata-wasm.wasm /out/
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -52,7 +52,7 @@ jobs:
         run: yarn install --frozen-lockfile
 
       - name: Build
-        run: yarn build
+        run: yarn build:types
 
       - name: Upload dist
         uses: actions/upload-artifact@v4
@@ -76,13 +76,6 @@ jobs:
         with:
           name: dist
           path: dist
-
-      - name: Ensure dist structure
-        run: |
-          if [ -f dist/dist/index.js ]; then
-            mv dist/dist/* dist/ 2>/dev/null || true
-            rm -rf dist/dist
-          fi
 
       - name: Check version and release
         id: release
@@ -144,21 +137,14 @@ jobs:
           name: dist
           path: dist
 
-      - name: Ensure dist structure
-        run: |
-          if [ -f dist/dist/index.js ]; then
-            mv dist/dist/* dist/ 2>/dev/null || true
-            rm -rf dist/dist
-          fi
-
       - name: Prepare Pages artifact
         run: |
-          for f in dist/index.js dist/index.d.ts dist/ffprobe-wasm.js dist/ffprobe-wasm.wasm; do
+          for f in dist/index.js dist/index.d.ts dist/ffprobe-metadata-wasm.js dist/ffprobe-metadata-wasm.wasm; do
             [ -f "$f" ] || { echo "::error::Missing $f"; exit 1; }
           done
           mkdir -p pages
           cp -r example/* pages/
-          cp dist/index.js dist/index.d.ts dist/ffprobe-wasm.js dist/ffprobe-wasm.wasm pages/
+          cp dist/index.js dist/index.d.ts dist/ffprobe-metadata-wasm.js dist/ffprobe-metadata-wasm.wasm pages/
           sed -i "s|../dist/|./|g" pages/index.html
 
       - name: Upload artifact

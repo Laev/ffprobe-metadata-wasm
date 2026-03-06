@@ -53,10 +53,10 @@ The package resolves wasm paths via `import.meta.url`. **Note**: After bundling,
 ```typescript
 import { init, getInfo } from 'ffprobe-metadata-wasm';
 
-// Ensure ffprobe-wasm.wasm / ffprobe-wasm.js are deployed, then init
+// Ensure ffprobe-metadata-wasm.wasm / ffprobe-metadata-wasm.js are deployed, then init
 await init({
-  wasmUrl: '/ffprobe-wasm.wasm',   // or CDN, relative path, etc.
-  wasmJsUrl: '/ffprobe-wasm.js',
+  wasmUrl: '/ffprobe-metadata-wasm.wasm',   // or CDN, relative path, etc.
+  wasmJsUrl: '/ffprobe-metadata-wasm.js',
 });
 
 const result = await getInfo(videoFile);
@@ -72,7 +72,7 @@ if (result.result === 'ok') {
 }
 ```
 
-Wasm files are in `node_modules/ffprobe-metadata-wasm/dist/` or `dist/dist/`.
+Wasm files are in `node_modules/ffprobe-metadata-wasm/dist/`.
 
 ### Explicit init and custom WASM URL
 
@@ -81,8 +81,8 @@ import { init, getInfo } from 'ffprobe-metadata-wasm';
 
 // Custom WASM paths (e.g. from CDN)
 await init({
-  wasmUrl: 'https://unpkg.com/ffprobe-metadata-wasm@0.1.0/dist/ffprobe-wasm.wasm',
-  wasmJsUrl: 'https://unpkg.com/ffprobe-metadata-wasm@0.1.0/dist/ffprobe-wasm.js',
+  wasmUrl: 'https://unpkg.com/ffprobe-metadata-wasm@0.1.0/dist/ffprobe-metadata-wasm.wasm',
+  wasmJsUrl: 'https://unpkg.com/ffprobe-metadata-wasm@0.1.0/dist/ffprobe-metadata-wasm.js',
 });
 
 // init is idempotent, safe to call multiple times
@@ -161,7 +161,7 @@ interface StreamInfo {
 ### Requirements
 
 - Node.js 18+
-- Docker (optional, for WASM build)
+- Docker (required for a full build, to generate WASM)
 
 ### Build WASM (requires Docker)
 
@@ -169,7 +169,13 @@ interface StreamInfo {
 yarn build:wasm
 ```
 
-### Build package
+### Build JS/types artifacts
+
+```bash
+yarn build:lib
+```
+
+### Build full package
 
 ```bash
 yarn build
@@ -178,7 +184,6 @@ yarn build
 ### Local preview
 
 ```bash
-yarn build:wasm  # First-time WASM build
 yarn build
 yarn dev
 ```
@@ -200,9 +205,8 @@ ffprobe-metadata-wasm/
 ├── dist/                 # Build output
 │   ├── index.js
 │   ├── vite-plugin.js
-│   └── dist/             # or root dist
-│       ├── ffprobe-wasm.js
-│       └── ffprobe-wasm.wasm
+│   ├── ffprobe-metadata-wasm.js
+│   └── ffprobe-metadata-wasm.wasm
 ├── example/              # Preview page (not published)
 ├── Dockerfile
 ├── Makefile

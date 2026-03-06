@@ -53,10 +53,10 @@ const result = await getInfo(videoFile);
 ```typescript
 import { init, getInfo } from 'ffprobe-metadata-wasm';
 
-// 确保 ffprobe-wasm.wasm / ffprobe-wasm.js 已部署到可访问路径后，显式 init
+// 确保 ffprobe-metadata-wasm.wasm / ffprobe-metadata-wasm.js 已部署到可访问路径后，显式 init
 await init({
-  wasmUrl: '/ffprobe-wasm.wasm',   // 或 CDN、相对路径等
-  wasmJsUrl: '/ffprobe-wasm.js',
+  wasmUrl: '/ffprobe-metadata-wasm.wasm',   // 或 CDN、相对路径等
+  wasmJsUrl: '/ffprobe-metadata-wasm.js',
 });
 
 const result = await getInfo(videoFile);
@@ -72,7 +72,7 @@ if (result.result === 'ok') {
 }
 ```
 
-wasm 文件位于 `node_modules/ffprobe-metadata-wasm/dist/` 或 `dist/dist/` 下。
+wasm 文件位于 `node_modules/ffprobe-metadata-wasm/dist/` 下。
 
 ### 显式初始化与自定义 WASM URL
 
@@ -81,8 +81,8 @@ import { init, getInfo } from 'ffprobe-metadata-wasm';
 
 // 自定义 WASM 资源路径（如从 CDN 加载）
 await init({
-  wasmUrl: 'https://unpkg.com/ffprobe-metadata-wasm@0.1.0/dist/ffprobe-wasm.wasm',
-  wasmJsUrl: 'https://unpkg.com/ffprobe-metadata-wasm@0.1.0/dist/ffprobe-wasm.js',
+  wasmUrl: 'https://unpkg.com/ffprobe-metadata-wasm@0.1.0/dist/ffprobe-metadata-wasm.wasm',
+  wasmJsUrl: 'https://unpkg.com/ffprobe-metadata-wasm@0.1.0/dist/ffprobe-metadata-wasm.js',
 });
 
 // init 幂等，可多次调用
@@ -161,7 +161,7 @@ interface StreamInfo {
 ### 环境要求
 
 - Node.js 18+
-- Docker（可选，用于构建 WASM）
+- Docker（完整构建需用到，用于生成 WASM）
 
 ### 构建 WASM（需 Docker）
 
@@ -169,7 +169,13 @@ interface StreamInfo {
 yarn build:wasm
 ```
 
-### 构建包
+### 构建类型/JS 产物
+
+```bash
+yarn build:lib
+```
+
+### 构建完整包
 
 ```bash
 yarn build
@@ -178,7 +184,6 @@ yarn build
 ### 本地预览
 
 ```bash
-yarn build:wasm  # 首次需构建 WASM
 yarn build
 yarn dev
 ```
@@ -198,8 +203,9 @@ ffprobe-metadata-wasm/
 │   └── ffprobe-wasm-wrapper.cpp  # C++ 封装
 ├── dist/                 # 构建输出
 │   ├── index.js
-│   ├── ffprobe-wasm.js
-│   └── ffprobe-wasm.wasm
+│   ├── vite-plugin.js
+│   ├── ffprobe-metadata-wasm.js
+│   └── ffprobe-metadata-wasm.wasm
 ├── example/              # 预览页（不随包发布）
 ├── Dockerfile
 ├── Makefile

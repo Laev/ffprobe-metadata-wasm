@@ -1,5 +1,5 @@
 /**
- * Vite 插件：自动将 ffprobe-wasm 的 WASM 资源复制到 public 目录，
+ * Vite 插件：自动将 ffprobe-metadata-wasm 的 WASM 资源复制到 public 目录，
  * 使消费者无需手动配置即可在开发和生产环境使用。
  *
  * 使用方式：在 vite.config.ts 中添加
@@ -13,22 +13,15 @@ import { fileURLToPath } from "url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-const WASM_FILES = ["ffprobe-wasm.wasm", "ffprobe-wasm.js"] as const;
+const WASM_FILES = [
+  "ffprobe-metadata-wasm.wasm",
+  "ffprobe-metadata-wasm.js",
+] as const;
 
 /** 插件运行在 node_modules/ffprobe-metadata-wasm/dist/vite-plugin.js，__dirname 即 dist */
 function getWasmSourceDir(): string | null {
-  const distDir = __dirname;
-  // 兼容 dist/dist 结构（Docker 构建输出）
-  const candidates = [
-    join(distDir, "dist"),
-    distDir,
-  ];
-  for (const dir of candidates) {
-    if (existsSync(join(dir, "ffprobe-wasm.wasm"))) {
-      return dir;
-    }
-  }
-  return null;
+  const dir = __dirname;
+  return existsSync(join(dir, "ffprobe-metadata-wasm.wasm")) ? dir : null;
 }
 
 export function ffprobeMetadataWasm(): Plugin {

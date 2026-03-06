@@ -113,12 +113,12 @@
   <script type="module">
     import { getInfo, init } from '../dist/index.js';
 
-    // 显式指定 WASM 路径。CI 部署时 ffprobe-wasm.js 与 index.html 同目录，sed 会把 DIST_BASE 替换为 ./
+    // 显式指定 WASM 路径。CI 部署时 ffprobe-metadata-wasm.js 与 index.html 同目录，sed 会把 DIST_BASE 替换为 ./
     const DIST_BASE = '../dist/';
     const base = new URL(DIST_BASE, document.baseURI).href;
     await init({
-      wasmJsUrl: base + 'ffprobe-wasm.js',
-      wasmUrl: base + 'ffprobe-wasm.wasm',
+      wasmJsUrl: base + 'ffprobe-metadata-wasm.js',
+      wasmUrl: base + 'ffprobe-metadata-wasm.wasm',
     });
 
     const fileInput = document.getElementById('fileInput');

@@ -62,21 +62,21 @@ function resolveUrls(options?: InitOptions): { jsUrl: string; wasmUrl: string } 
   if (baseUrl != null && typeof baseUrl === "string") {
     const baseNorm = baseUrl.endsWith("/") ? baseUrl : baseUrl + "/";
     return {
-      jsUrl: baseNorm + "ffprobe-wasm.js",
-      wasmUrl: baseNorm + "ffprobe-wasm.wasm",
+      jsUrl: baseNorm + "ffprobe-metadata-wasm.js",
+      wasmUrl: baseNorm + "ffprobe-metadata-wasm.wasm",
     };
   }
   try {
     // 非 Vite 或 import.meta.url 可用时的回退，运行时解析
-    const base = new URL("./ffprobe-wasm.js", import.meta.url).href;
+    const base = new URL("./ffprobe-metadata-wasm.js", import.meta.url).href;
     return {
       jsUrl: base,
       wasmUrl: base.replace(/\.js$/, ".wasm"),
     };
   } catch {
     return {
-      jsUrl: "./ffprobe-wasm.js",
-      wasmUrl: "./ffprobe-wasm.wasm",
+      jsUrl: "./ffprobe-metadata-wasm.js",
+      wasmUrl: "./ffprobe-metadata-wasm.wasm",
     };
   }
 }

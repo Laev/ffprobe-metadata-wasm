@@ -1,4 +1,4 @@
-dist/ffprobe-wasm.js:
+dist/ffprobe-metadata-wasm.js:
 	mkdir -p dist && \
 	emcc --bind \
 	-O2 \
@@ -7,5 +7,5 @@ dist/ffprobe-wasm.js:
 	-s EXPORTED_RUNTIME_METHODS="[FS, cwrap, ccall, getValue, setValue, writeAsciiToMemory]" \
 	-s INITIAL_MEMORY=268435456 \
 	-lavcodec -lavformat -lavutil -lswresample -lswscale -lm \
-	-o dist/ffprobe-wasm.js \
+	-o dist/ffprobe-metadata-wasm.js \
 	src/ffprobe-wasm-wrapper.cpp
